@@ -3,9 +3,6 @@ package main
 import (
 	"blueshare/internal/beacon"
 	"blueshare/internal/scan"
-	"blueshare/internal/spec"
-
-	"tinygo.org/x/bluetooth"
 )
 
 type CLI struct {
@@ -20,7 +17,7 @@ type BeaconCmd struct {
 }
 
 func (c *BeaconCmd) Run() error {
-	spec.CustomUUID, _ = bluetooth.ParseUUID(spec.CustomUUIDString)
+	// spec.CustomUUID, _ = bluetooth.ParseUUID(spec.CustomUUIDString)
 	return beacon.Broadcast(beacon.NewMessage(c.Message, c.Frequency))
 
 }
