@@ -2,10 +2,7 @@ package main
 
 import (
 	"github.com/alecthomas/kong"
-	"tinygo.org/x/bluetooth"
 )
-
-var CustomUUID bluetooth.UUID
 
 func main() {
 

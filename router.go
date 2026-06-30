@@ -1,7 +1,9 @@
 package main
 
 import (
-	"fmt"
+	"blueshare/internal/beacon"
+	"blueshare/internal/scan"
+	"blueshare/internal/spec"
 
 	"tinygo.org/x/bluetooth"
 )
@@ -15,32 +17,18 @@ type BeaconCmd struct {
 	Message   string `arg:"" name:"msg" help:"String to be broadcast."`
 	Frequency int    `default:"2" name:"frequency" short:"f" help:"Frequency at which the message should be broardcast.\nWithin range 1-3"`
 	Once      bool   `help:"Only broadcast message once."`
-	adapter   *bluetooth.Adapter
 }
 
 func (c *BeaconCmd) Run() error {
-	CustomUUID, _ = bluetooth.ParseUUID(CustomUUIDString)
-	c.adapter = bluetooth.DefaultAdapter
-	err := c.adapter.Enable()
-	if err != nil {
-		return fmt.Errorf("failed to enable adapter, is bluetooth on? error: %+v", err)
-	}
-
-	return c.Broadcast()
+	spec.CustomUUID, _ = bluetooth.ParseUUID(spec.CustomUUIDString)
+	return beacon.Broadcast(beacon.NewMessage(c.Message, c.Frequency))
 
 }
 
 type ScanCmd struct {
-	adapter bluetooth.Adapter
 }
 
 func (c *ScanCmd) Run() error {
 
-	c.adapter = *bluetooth.DefaultAdapter
-	err := c.adapter.Enable()
-	if err != nil {
-		return fmt.Errorf("failed to enable adapter, is bluetooth on? error: %+v", err)
-	}
-
-	return c.Scan()
+	return scan.Scan()
 }
