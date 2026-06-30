@@ -1,7 +1,6 @@
 package scan
 
 import (
-	"blueshare/internal/spec"
 	"fmt"
 
 	"tinygo.org/x/bluetooth"
@@ -19,8 +18,14 @@ func Scan() error {
 
 	err = adapter.Scan(func(adapter *bluetooth.Adapter, device bluetooth.ScanResult) {
 
-		for _, data := range device.ServiceData() {
-			if data.UUID == spec.CustomUUID {
+		// for _, data := range device.ServiceData() {
+		// 	if data.UUID == spec.CustomUUID {
+		// 		fmt.Println("data found: ", string(data.Data))
+		// 	}
+		// }
+
+		for _, data := range device.ManufacturerData() {
+			if data.CompanyID == 0xff {
 				fmt.Println("data found: ", string(data.Data))
 			}
 		}
