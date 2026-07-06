@@ -1,14 +1,18 @@
 package scan
 
 import (
+	"blueshare/internal/spec"
 	"fmt"
+	"sync"
+	"time"
 
 	"tinygo.org/x/bluetooth"
 )
 
-var msg string
+var msg = make([]byte, 256)
+var mu = sync.Mutex{}
 
-func Scan() error {
+func StartScan() error {
 
 	adapter := bluetooth.DefaultAdapter
 	err := adapter.Enable()
@@ -16,12 +20,10 @@ func Scan() error {
 		return fmt.Errorf("failed to enable adapter, is bluetooth on? error: %+v", err)
 	}
 
-	ch := make(chan bool)
-
 	// mu := sync.Mutex
 
-	go func(ch chan bool, adapter *bluetooth.Adapter) {
-		err = adapter.Scan(func(adapter *bluetooth.Adapter, device bluetooth.ScanResult) {
+	go func(adapter *bluetooth.Adapter) {
+		err := adapter.Scan(func(adapter *bluetooth.Adapter, device bluetooth.ScanResult) {
 
 			// for _, data := range device.ServiceData() {
 			// 	if data.UUID == spec.CustomUUID {
@@ -31,28 +33,26 @@ func Scan() error {
 
 			for _, data := range device.ManufacturerData() {
 				if data.CompanyID == 0xff {
+					seqNum := int(data.Data[0])
+					// sequence number holds the index of the packet being sent and each packet is of fixed size.
+					baseIndex := seqNum * (spec.ByteSizeManufacturerData - 1)
+					mu.Lock()
+					copy(msg[baseIndex:], data.Data[1:])
+					mu.Unlock()
 
-					if data.Data[0] == 0x00 {
-						ch <- true
-						return
-					}
-
-					msg += string(data.Data)
 				}
 			}
 
 		})
 
-	}(ch, adapter)
+		fmt.Printf("error found while scanning, error : %+v", err)
+	}(adapter)
 
-	<-ch
+	time.Sleep(time.Duration(spec.BroadcastWindow) * time.Second)
 
 	defer adapter.StopScan()
-	if err != nil {
-		return fmt.Errorf("failed to start scanning, error: %+v", err)
-	}
 
-	fmt.Println("the message is: ", msg)
+	fmt.Println("the message is: ", string(msg))
 
 	return nil
 

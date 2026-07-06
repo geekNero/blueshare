@@ -23,9 +23,10 @@ func (c *BeaconCmd) Run() error {
 }
 
 type ScanCmd struct {
+	Fetch bool `help:"Fetch currently scanned message"`
 }
 
 func (c *ScanCmd) Run() error {
 
-	return scan.Scan()
+	return scan.StartScan()
 }
