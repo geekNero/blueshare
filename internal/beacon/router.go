@@ -1,0 +1,38 @@
+package beacon
+
+import (
+	"blueshare/internal/spec"
+	"blueshare/internal/utility"
+	"fmt"
+	"net/rpc"
+)
+
+type BeaconCmd struct {
+	Message   string `arg:"" name:"msg" help:"String to be broadcast."`
+	Frequency int    `default:"2" name:"frequency" short:"f" help:"Frequency at which the message should be broardcast.\nWithin range 1-3"`
+	Once      bool   `help:"Only broadcast message once."`
+}
+
+func (c *BeaconCmd) Run() error {
+	// spec.CustomUUID, _ = bluetooth.ParseUUID(spec.CustomUUIDString)
+	socketAddr := utility.GetSocketPath(spec.SocketAddr)
+	client, err := rpc.Dial("unix", socketAddr)
+	if err != nil {
+		return fmt.Errorf("error while connecting to socket, ensure blueshare daemon is running, error: %+v", err)
+	}
+
+	defer client.Close()
+
+	var reply spec.ErrorResponse
+
+	err = client.Call("Ritual.Broadcast", c, &reply)
+	if err != nil {
+		return fmt.Errorf("error while calling daemon method, error: %+v", err)
+	}
+
+	if reply.Err != nil {
+		fmt.Printf("%s, err: %+v\n", spec.ErrorMap[reply.Error], reply.Err)
+	}
+	return nil
+
+}

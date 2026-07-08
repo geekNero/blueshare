@@ -4,7 +4,7 @@ go 1.25.1
 
 require (
 	github.com/alecthomas/kong v1.15.0
-	tinygo.org/x/bluetooth v0.15.0
+	tinygo.org/x/bluetooth v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -20,3 +20,9 @@ require (
 	golang.org/x/exp v0.0.0-20241204233417-43b7b7cde48d // indirect
 	golang.org/x/sys v0.11.0 // indirect
 )
+
+// replace (
+// 	tinygo.org/x/bluetooth => /home/nginx/Projects/bluetooth
+// )
+
+replace tinygo.org/x/bluetooth => github.com/geekNero/bluetooth v0.0.1
