@@ -19,7 +19,6 @@ func StartScan() spec.ErrorResponse {
 	if adapter != nil {
 		return spec.ErrorResponse{
 			Error: spec.ErrScanAlreadyInProgress,
-			Err:   nil,
 		}
 	}
 
@@ -27,8 +26,8 @@ func StartScan() spec.ErrorResponse {
 	err := adapter.Enable()
 	if err != nil {
 		return spec.ErrorResponse{
-			Error: spec.ErrFailedToEnableAdapter,
-			Err:   err,
+			Error:  spec.ErrFailedToEnableAdapter,
+			ErrMsg: err.Error(),
 		}
 	}
 

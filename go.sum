@@ -7,8 +7,8 @@ github.com/alecthomas/repr v0.5.2/go.mod h1:Fr0507jx4eOXV7AlPV6AVZLYrLIuIeSOWtW5
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/geekNero/bluetooth v0.0.1 h1:djKgGgaf+L9mj+A8RdippkNT1mD1pQWLksnYlkdOr0Q=
-github.com/geekNero/bluetooth v0.0.1/go.mod h1:meayNB+9rC1igTUNmNU7KftlSEzrFHe37rBSQZjHN8Y=
+github.com/geekNero/bluetooth v0.0.2 h1:Zssts3Nw1FqsS7h23AcJT5OB5/4l6a3rp6bi2Fo91as=
+github.com/geekNero/bluetooth v0.0.2/go.mod h1:BwZtw6+/88tX8G6MTDNA8hmoZa6O+qkoBkis6+IA+q0=
 github.com/go-ole/go-ole v1.2.6 h1:/Fpf6oFPoeFik9ty7siob0G6Ke8QvQEuVcuChpwXzpY=
 github.com/go-ole/go-ole v1.2.6/go.mod h1:pprOEPIfldk/42T2oK7lQ4v4JSDwmV0As9GaiUsvbm0=
 github.com/godbus/dbus/v5 v5.1.0 h1:4KLkAxT3aOY8Li4FRJe/KvhoNFFxo0m6fNuFUO8QJUk=

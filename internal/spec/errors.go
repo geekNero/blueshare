@@ -4,7 +4,7 @@ type Error int
 
 type ErrorResponse struct {
 	Error
-	Err error
+	ErrMsg string
 }
 
 const (
@@ -16,14 +16,16 @@ const (
 	ErrScanAlreadyInProgress = 2000
 
 	// Broadcasting errors
-	ErrInvalidMessage = 3000
+	ErrInvalidMessage             = 3000
+	ErrBroadcastAlreadyInProgress = 3001
 )
 
 var (
 	ErrorMap = map[Error]string{
-		ErrScanAlreadyInProgress: "scan is already in-progress",
-		ErrFailedToEnableAdapter: "failed to enable adapter, is bluetooth on?",
-		ErrInvalidMessage:        "input message contains invalid characters",
-		ErrUnknown:               "unknown error",
+		ErrScanAlreadyInProgress:      "scan is already in-progress",
+		ErrFailedToEnableAdapter:      "failed to enable adapter, is bluetooth on?",
+		ErrInvalidMessage:             "input message contains invalid characters",
+		ErrUnknown:                    "unknown error",
+		ErrBroadcastAlreadyInProgress: "a message is already under broadcast, stop the existing broadcast or force a new one",
 	}
 )

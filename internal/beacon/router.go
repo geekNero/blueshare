@@ -8,9 +8,10 @@ import (
 )
 
 type BeaconCmd struct {
-	Message   string `arg:"" name:"msg" help:"String to be broadcast."`
+	Message   string `default:"" name:"msg" short:"m" help:"String to be broadcast."`
 	Frequency int    `default:"2" name:"frequency" short:"f" help:"Frequency at which the message should be broardcast.\nWithin range 1-3"`
 	Once      bool   `help:"Only broadcast message once."`
+	Stop      bool   `help:"Stop broadcasting"`
 }
 
 func (c *BeaconCmd) Run() error {
@@ -23,6 +24,14 @@ func (c *BeaconCmd) Run() error {
 
 	defer client.Close()
 
+	if c.Stop {
+		err = client.Call("Ritual.StopBroadcast", struct{}{}, &struct{}{})
+		if err != nil {
+			return fmt.Errorf("error while calling daemon method, error: %+v", err)
+		}
+		return nil
+	}
+
 	var reply spec.ErrorResponse
 
 	err = client.Call("Ritual.Broadcast", c, &reply)
@@ -30,8 +39,8 @@ func (c *BeaconCmd) Run() error {
 		return fmt.Errorf("error while calling daemon method, error: %+v", err)
 	}
 
-	if reply.Err != nil {
-		fmt.Printf("%s, err: %+v\n", spec.ErrorMap[reply.Error], reply.Err)
+	if reply.ErrMsg != "" {
+		fmt.Printf("%s, err: %s\n", spec.ErrorMap[reply.Error], reply.ErrMsg)
 	}
 	return nil
 

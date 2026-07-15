@@ -21,13 +21,23 @@ func (r *Ritual) Broadcast(c beacon.BeaconCmd, err *spec.ErrorResponse) error {
 	return nil
 }
 
+func (r *Ritual) StopBroadcast(_ Ritual, _ *Ritual) error {
+	beacon.Stop()
+	return nil
+}
+
 func (r *Ritual) Scan(_ Ritual, err *spec.ErrorResponse) error {
 	*err = scan.StartScan()
 	return nil
 }
 
-func (r *Ritual) StopScan(_ Ritual, err *error) error {
-	*err = scan.StopScan()
+func (r *Ritual) StopScan(_ Ritual, err *string) error {
+	e := scan.StopScan()
+	if e != nil {
+		*err = e.Error()
+	} else {
+		*err = ""
+	}
 	return nil
 }
 
@@ -61,6 +71,9 @@ func main() {
 	<-sigs // Blocks until systemd or user sends a kill signal
 
 	fmt.Println("\nSignal received. Purging socket and returning to the void...")
+	if fetchErr := beacon.FetchError(); fetchErr != nil {
+		fmt.Printf("Error found in broadcasting, err: %+v", fetchErr)
+	}
 	if err := scan.StopScan(); err != nil {
 		fmt.Println(err)
 	}

@@ -21,8 +21,6 @@ require (
 	golang.org/x/sys v0.11.0 // indirect
 )
 
-// replace (
-// 	tinygo.org/x/bluetooth => /home/nginx/Projects/bluetooth
-// )
+// replace tinygo.org/x/bluetooth => /home/nginx/Projects/bluetooth
 
-replace tinygo.org/x/bluetooth => github.com/geekNero/bluetooth v0.0.1
+replace tinygo.org/x/bluetooth => github.com/geekNero/bluetooth v0.0.2

@@ -1,5 +1,7 @@
 package spec
 
+import "time"
+
 var (
 	SocketAddr = "blueshare.sock"
 
@@ -8,9 +10,9 @@ var (
 	// CustomUUID       bluetooth.UUID
 
 	// Limits
-	MaximumMessageLength     = 156
-	BroadcastWindow          = 120 // seconds
-	DefaultPerPacketDuration = 20  // seconds
-	ByteSizeManufacturerData = 27
-	ByteSizeServiceData      = 12
+	MaximumMessageLength                   = 156
+	BroadcastWindow                        = 120 // seconds
+	DefaultPerPacketDuration time.Duration = 20  // seconds
+	ByteSizeManufacturerData               = 27
+	ByteSizeServiceData                    = 12
 )

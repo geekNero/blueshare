@@ -31,13 +31,13 @@ func (c *ScanCmd) Run() error {
 		fmt.Println("message found is: ", reply)
 		return nil
 	} else if c.StopScan {
-		var reply error
+		var reply string
 		err = client.Call("Ritual.StopScan", struct{}{}, &reply)
 		if err != nil {
 			return fmt.Errorf("error while calling daemon method, error: %+v", err)
 		}
-		if reply != nil {
-			return fmt.Errorf("failed to stop scanning, err: %+v", reply)
+		if reply != "" {
+			return fmt.Errorf("failed to stop scanning, err: %s", reply)
 		}
 	} else {
 		var reply spec.ErrorResponse
@@ -45,8 +45,8 @@ func (c *ScanCmd) Run() error {
 		if err != nil {
 			return fmt.Errorf("error while calling daemon method, error: %+v", err)
 		}
-		if reply.Err != nil {
-			return fmt.Errorf("%s, err: %+v", spec.ErrorMap[reply.Error], reply.Err)
+		if reply.ErrMsg != "" {
+			return fmt.Errorf("%s, err: %s", spec.ErrorMap[reply.Error], reply.ErrMsg)
 		}
 		if reply.Error != spec.Error(0) {
 			fmt.Println(spec.ErrorMap[reply.Error])
