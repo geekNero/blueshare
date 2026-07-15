@@ -2,8 +2,19 @@
 
 package beacon
 
-import "fmt"
+import (
+	"blueshare/internal/spec"
+)
 
-func Broadcast(_ *Message) error {
-	return fmt.Errorf("broadcasting is not implemented for MacOS")
+func Broadcast(c *BeaconCmd) spec.ErrorResponse {
+	return spec.ErrorResponse{
+		Error: spec.ErrNotImplemented,
+	}
+}
+
+func Stop() {
+}
+
+func FetchError() error {
+	return nil
 }
