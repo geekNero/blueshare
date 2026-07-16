@@ -22,13 +22,16 @@ func (c *ScanCmd) Run() error {
 	defer client.Close()
 
 	if c.Fetch {
-		var reply string
-		err = client.Call("Ritual.FetchMessage", struct{}{}, &reply)
+		var replies []string
+		err = client.Call("Ritual.FetchMessage", struct{}{}, &replies)
 		if err != nil {
 			return fmt.Errorf("error while calling daemon method, error: %+v", err)
 		}
 
-		fmt.Println("message found is: ", reply)
+		fmt.Println("list of messages found:")
+		for index, reply := range replies {
+			fmt.Printf("%d: %s", index, reply)
+		}
 		return nil
 	} else if c.StopScan {
 		var reply string

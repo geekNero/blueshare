@@ -13,7 +13,7 @@ import (
 )
 
 type Window struct {
-	advPool    []bluetooth.Advertisement
+	advPool    []*bluetooth.Advertisement
 	startIndex int
 	endIndex   int
 	set        bool
@@ -111,9 +111,11 @@ func advertiseBlockLocked(start int, end int) error {
 
 func stopAdvertisingBlockLocked(start int, end int) error {
 	var err error
+	fmt.Printf("start index: %d, end index: %d\n", start, end)
 	for index := start; index < end; index++ {
 		slot := window.advPool[index%len(window.advPool)]
 		if !slot.Started() {
+			fmt.Println("packet not advertising: ", slot.Started())
 			continue
 		}
 		err = slot.Stop()
@@ -138,9 +140,16 @@ func slideRight() error {
 
 	window.mu.Lock()
 	defer window.mu.Unlock()
+	slotsBefore, _ := adapter.adapter.GetAdvertisementSlots()
+
 	err := stopAdvertisingBlockLocked(window.startIndex, window.startIndex+1)
 	if err != nil {
 		return err
+	}
+
+	slotsAfter, _ := adapter.adapter.GetAdvertisementSlots()
+	if slotsAfter <= slotsBefore {
+		fmt.Println("advertisements slot was not released")
 	}
 
 	window.startIndex++
@@ -149,7 +158,6 @@ func slideRight() error {
 		return err
 	}
 	window.endIndex++
-
 	return nil
 }
 
@@ -160,7 +168,7 @@ func slidingWindow(ctx context.Context) {
 	payloadSize := spec.ByteSizeManufacturerData - 1
 	window.mu.Lock()
 	numPackets := (len(window.data) + payloadSize - 1) / payloadSize
-	window.advPool = make([]bluetooth.Advertisement, 0, numPackets)
+	window.advPool = make([]*bluetooth.Advertisement, 0, numPackets)
 
 	window.endIndex = int(advertisementSlots)
 	window.startIndex = 0
@@ -173,7 +181,7 @@ func slidingWindow(ctx context.Context) {
 	var sequenceNum uint8
 	for range numPackets {
 		newPacketEnd := min(len(window.data), newPacketStart+payloadSize)
-		window.advPool = append(window.advPool, *newAdvertisingPacket(window.data[newPacketStart:newPacketEnd], sequenceNum))
+		window.advPool = append(window.advPool, newAdvertisingPacket(window.data[newPacketStart:newPacketEnd], sequenceNum))
 		newPacketStart = newPacketEnd
 		sequenceNum++
 	}
@@ -200,7 +208,7 @@ func slidingWindow(ctx context.Context) {
 
 	for {
 		select {
-		case <-time.After(time.Second * 20):
+		case <-time.After(time.Second * 2):
 			err = slideRight()
 			if err != nil {
 				fmt.Printf("failed to slide window, error: %+v\n", err)
@@ -218,81 +226,6 @@ func slidingWindow(ctx context.Context) {
 	}
 
 }
-
-// windowedRoundRobin breaks the advertisement content into smaller packets and distributes them among
-// the supported instances for advertisement in a round robin manner until the total time window expires.
-// func windowedRoundRobin(adapter *bluetooth.Adapter, c *BeaconCmd) {
-// 	data := []byte(c.Message)
-// 	payloadSize := spec.ByteSizeManufacturerData - 1
-// 	numPackets := (len(c.Message) + payloadSize - 1) / payloadSize
-// 	// timeBracket := (spec.BroadcastWindow / (numPackets * 2))
-// 	timeBracket := spec.DefaultPerPacketDuration
-// 	var sequenceNum uint8
-// 	var index = 0
-// 	for {
-// 		wg := sync.WaitGroup{}
-// 		for range advertisementSlots {
-// 			sequenceNum = uint8(index % numPackets)
-// 			offset := int(sequenceNum) * (payloadSize)
-// 			endOffset := min(offset+payloadSize, len(c.Message))
-// 			wg.Add(1)
-// 			go func(adapter *bluetooth.Adapter, sequenceNum uint8, timeBracket int64, payload []byte, wg *sync.WaitGroup) {
-// 				defer wg.Done()
-// data := make([]byte, 1, spec.ByteSizeManufacturerData)
-// data[0] = sequenceNum
-// data = append(data, payload...)
-// 				advertise(data, adapter, timeBracket)
-
-// 			}(adapter, sequenceNum, int64(timeBracket)*int64(time.Second), data[offset:endOffset], &wg)
-// 			index = (index + 1) % numPackets
-// 		}
-// 		wg.Wait()
-// 	}
-// }
-
-// func advertise(data []byte, adapter *bluetooth.Adapter, duration int64) {
-
-// 	fmt.Println("broadcasting new packet: ", string(data))
-// 	defer fmt.Println("my packet was: ", string(data))
-
-// 	advOptions := bluetooth.AdvertisementOptions{
-// 		// LocalName: string(data),
-// 		ManufacturerData: []bluetooth.ManufacturerDataElement{
-// 			{
-// 				CompanyID: 0xff,
-// 				Data:      data,
-// 			},
-// 		},
-// 		// ServiceData: []bluetooth.ServiceDataElement{
-// 		// 	{
-// 		// 		UUID: spec.CustomUUID,
-// 		// 		Data: []byte(message.msg),
-// 		// 	},
-// 		// },
-// 	}
-// 	mu.Lock()
-// 	advertisement := adapter.NewAdvertisement()
-// 	err := advertisement.Configure(advOptions)
-// 	if err != nil {
-// 		mu.Unlock()
-// 		fmt.Printf("failed to configure advertisement, error: %+v", err)
-// 		return
-// 	}
-
-// 	mu.Lock()
-// 	err = advertisement.Start()
-// 	if err != nil {
-// 		mu.Unlock()
-// 		fmt.Printf("failed to start advertisement, error: %+v", err)
-// 		return
-// 	}
-// 	mu.Unlock()
-
-// 	time.Sleep(time.Duration(duration))
-// 	mu.Lock()
-// 	advertisement.Stop()
-// 	mu.Unlock()
-// }
 
 func FetchError() error {
 	window.mu.Lock()

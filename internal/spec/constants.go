@@ -10,7 +10,7 @@ var (
 	// CustomUUID       bluetooth.UUID
 
 	// Limits
-	MaximumMessageLength                   = 156
+	MaximumMessageLength                   = 1024
 	BroadcastWindow                        = 120 // seconds
 	DefaultPerPacketDuration time.Duration = 20  // seconds
 	ByteSizeManufacturerData               = 27

@@ -9,9 +9,10 @@ import (
 )
 
 var (
-	message = make([]byte, 256)
-	mu      = sync.Mutex{}
-	adapter *bluetooth.Adapter
+	message  = make([]byte, 256)
+	mu       = sync.Mutex{}
+	messages = sync.Map{}
+	adapter  *bluetooth.Adapter
 )
 
 func StartScan() spec.ErrorResponse {
@@ -42,12 +43,21 @@ func StartScan() spec.ErrorResponse {
 
 			for _, data := range device.ManufacturerData() {
 				if data.CompanyID == 0xff {
+					// msg, _ := messages[device.A]
 					seqNum := int(data.Data[0])
 					// sequence number holds the index of the packet being sent and each packet is of fixed size.
 					baseIndex := seqNum * (spec.ByteSizeManufacturerData - 1)
-					mu.Lock()
-					copy(message[baseIndex:], data.Data[1:])
-					mu.Unlock()
+					for {
+						emptyByteArray := make([]byte, spec.MaximumMessageLength)
+						raw, _ := messages.LoadOrStore(device.Address.String(), &emptyByteArray)
+						var message = raw.(*[]byte)
+
+						copy((*message)[baseIndex:], data.Data[1:])
+						ok := messages.CompareAndSwap(device.Address.String(), raw, message)
+						if ok {
+							break
+						}
+					}
 
 				}
 			}
@@ -76,10 +86,13 @@ func StopScan() error {
 	return nil
 }
 
-func FetchMessage() string {
-	reply := ""
-	mu.Lock()
-	reply = string(message)
-	mu.Unlock()
-	return reply
+func FetchMessages() *[]string {
+	replies := make([]string, 0)
+
+	messages.Range(func(key, value any) bool {
+		reply := value.(*[]byte)
+		replies = append(replies, string(*reply))
+		return true
+	})
+	return &replies
 }

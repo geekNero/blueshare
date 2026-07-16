@@ -41,8 +41,8 @@ func (r *Ritual) StopScan(_ Ritual, err *string) error {
 	return nil
 }
 
-func (r *Ritual) FetchMessage(_ Ritual, message *string) error {
-	*message = scan.FetchMessage()
+func (r *Ritual) FetchMessage(_ Ritual, messages *[]string) error {
+	messages = scan.FetchMessages()
 	return nil
 }
 
