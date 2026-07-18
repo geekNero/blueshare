@@ -17,21 +17,25 @@ type Ritual struct {
 }
 
 func (r *Ritual) Broadcast(c beacon.BeaconCmd, err *spec.ErrorResponse) error {
+	fmt.Println("received request to start broadcasting")
 	*err = beacon.Broadcast(&c)
 	return nil
 }
 
 func (r *Ritual) StopBroadcast(_ Ritual, _ *Ritual) error {
+	fmt.Println("received request to stop broadcasting")
 	beacon.Stop()
 	return nil
 }
 
 func (r *Ritual) Scan(_ Ritual, err *spec.ErrorResponse) error {
+	fmt.Println("received request to start scanning")
 	*err = scan.StartScan()
 	return nil
 }
 
 func (r *Ritual) StopScan(_ Ritual, err *string) error {
+	fmt.Println("received request to stop scanning")
 	e := scan.StopScan()
 	if e != nil {
 		*err = e.Error()
@@ -42,7 +46,8 @@ func (r *Ritual) StopScan(_ Ritual, err *string) error {
 }
 
 func (r *Ritual) FetchMessage(_ Ritual, messages *[]string) error {
-	messages = scan.FetchMessages()
+	fmt.Println("received request to fetch messages")
+	*messages = scan.FetchMessages()
 	return nil
 }
 

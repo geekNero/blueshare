@@ -111,7 +111,6 @@ func advertiseBlockLocked(start int, end int) error {
 
 func stopAdvertisingBlockLocked(start int, end int) error {
 	var err error
-	fmt.Printf("start index: %d, end index: %d\n", start, end)
 	for index := start; index < end; index++ {
 		slot := window.advPool[index%len(window.advPool)]
 		if !slot.Started() {
@@ -130,7 +129,7 @@ func endAdvertisement() {
 	window.mu.Lock()
 	defer window.mu.Unlock()
 	window.set = false
-	err := stopAdvertisingBlockLocked(window.startIndex, window.endIndex)
+	err := stopAdvertisingBlockLocked(0, len(window.advPool))
 	if err != nil {
 		fmt.Printf("error while ending advertisement, err: %+v\n", err)
 	}
@@ -240,7 +239,9 @@ func Stop() {
 		return
 	}
 	window.mu.Unlock()
-	endAdvertisement()
+	window.cancel()
+	<-window.await
+
 }
 
 func Broadcast(c *BeaconCmd) spec.ErrorResponse {

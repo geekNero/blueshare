@@ -9,11 +9,17 @@ import (
 )
 
 var (
-	message  = make([]byte, 256)
+	messages = make(map[string][]byte)
 	mu       = sync.Mutex{}
-	messages = sync.Map{}
 	adapter  *bluetooth.Adapter
 )
+
+/*
+	pick up first byte.
+
+	what kind of sync mechanisms should I use in situations where write is dominant.
+
+*/
 
 func StartScan() spec.ErrorResponse {
 
@@ -43,22 +49,18 @@ func StartScan() spec.ErrorResponse {
 
 			for _, data := range device.ManufacturerData() {
 				if data.CompanyID == 0xff {
+					mu.Lock()
+					message, ok := messages[device.Address.String()]
+					if !ok {
+						message = make([]byte, spec.MaximumMessageLength)
+					}
 					// msg, _ := messages[device.A]
 					seqNum := int(data.Data[0])
 					// sequence number holds the index of the packet being sent and each packet is of fixed size.
 					baseIndex := seqNum * (spec.ByteSizeManufacturerData - 1)
-					for {
-						emptyByteArray := make([]byte, spec.MaximumMessageLength)
-						raw, _ := messages.LoadOrStore(device.Address.String(), &emptyByteArray)
-						var message = raw.(*[]byte)
-
-						copy((*message)[baseIndex:], data.Data[1:])
-						ok := messages.CompareAndSwap(device.Address.String(), raw, message)
-						if ok {
-							break
-						}
-					}
-
+					copy(message[baseIndex:], data.Data[1:])
+					messages[device.Address.String()] = message
+					mu.Unlock()
 				}
 			}
 
@@ -86,13 +88,13 @@ func StopScan() error {
 	return nil
 }
 
-func FetchMessages() *[]string {
-	replies := make([]string, 0)
+func FetchMessages() []string {
+	var replies = []string{}
+	mu.Lock()
+	for _, message := range messages {
+		replies = append(replies, string(message))
+	}
+	mu.Unlock()
 
-	messages.Range(func(key, value any) bool {
-		reply := value.(*[]byte)
-		replies = append(replies, string(*reply))
-		return true
-	})
-	return &replies
+	return replies
 }
